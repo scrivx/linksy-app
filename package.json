@@ -1,0 +1,15 @@
+{
+  "name": "Linksy",
+  "version": "1.0.0",
+  "description": "Scalable URL Shortener SaaS",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Scrivx",
+  "license": "ISC",
+  "packageManager": "pnpm@10.27.0"
+}

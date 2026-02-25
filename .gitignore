@@ -1,0 +1,10 @@
+node_modules
+
+# build directories
+**/dist
+
+# environment files
+.env
+
+# pnpm
+.pnpm-store
