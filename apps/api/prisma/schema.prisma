@@ -6,20 +6,19 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  // connection URL is defined in prisma.config.ts per Prisma v7 configuration
 }
 
 model Link {
-  id             String   @id @default(uuid())
-  alias          String   @unique
-  original_url   String
-  clicks         Int      @default(0)
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  id               String   @id @default(uuid())
+  alias            String   @unique
+  original_url     String
+  clicks           Int      @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
   last_accessed_at DateTime?
 }

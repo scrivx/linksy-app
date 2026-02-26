@@ -35,16 +35,52 @@ export const redirect = async (
   req: Request<{ alias: string }>,
   res: Response,
 ) => {
-  // alias is guaranteed to be a string by the generic above
-  const { alias } = req.params;
+  try {
+    const { alias } = req.params;
+    const link = await service.getLink(alias);
 
-  const link = await service.getLink(alias);
+    if (!link) {
+      return res.status(404).send('Link not found');
+    }
 
-  if (!link) {
-    return res.status(404).send('Link not found');
+    await service.registerClick(alias);
+    res.redirect(link.original_url);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error' });
   }
+};
 
-  await service.registerClick(alias);
+export const getLinkDetails = async (
+  req: Request<{ alias: string }>,
+  res: Response,
+) => {
+  try {
+    const { alias } = req.params;
+    const link = await service.getLink(alias);
 
-  res.redirect(link.original_url);
+    if (!link) {
+      return res.status(404).json({ error: 'Link not found' });
+    }
+
+    res.json(link);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getStats = async (
+  req: Request<{ alias: string }>,
+  res: Response,
+) => {
+  try {
+    const { alias } = req.params;
+    const stats = await service.getLinkStats(alias);
+
+    res.json(stats);
+  } catch (error: any) {
+    if (error.message === 'Link not found') {
+      return res.status(404).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };

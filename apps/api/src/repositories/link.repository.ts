@@ -1,7 +1,6 @@
 import { prisma } from '../config/prisma';
-import type { Link } from '../models/link.model';
 
-export const createLink = async (alias: string, url: string): Promise<Link> => {
+export const createLink = async (alias: string, url: string) => {
   return prisma.link.create({
     data: {
       alias,
@@ -10,13 +9,13 @@ export const createLink = async (alias: string, url: string): Promise<Link> => {
   });
 };
 
-export const findByAlias = async (alias: string): Promise<Link | null> => {
+export const findByAlias = async (alias: string) => {
   return prisma.link.findUnique({
     where: { alias },
   });
 };
 
-export const incrementClicks = async (alias: string): Promise<Link> => {
+export const incrementClicks = async (alias: string) => {
   return prisma.link.update({
     where: { alias },
     data: {

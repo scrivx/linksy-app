@@ -1,8 +1,10 @@
+import 'dotenv/config';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client';
 
-// create a singleton so the client is reused during hot-reloads
-// pass an empty options object; additional configuration (logging, datasources, etc.)
-// can be provided here if needed
-// PrismaClient requires an options object with generic parameters; an empty
-// object cast to `any` works when no custom config is needed.
-export const prisma = new PrismaClient({} as any);
+const connectionString = `${process.env.DATABASE_URL}`;
+
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
+
+export { prisma };
