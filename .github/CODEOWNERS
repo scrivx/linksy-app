@@ -1,0 +1,25 @@
+# Owners del Código de Linksy
+
+# Documentación: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Raíz
+
+- @scriv
+
+# API
+
+/apps/api/ @scriv
+
+# Frontend/Web
+
+/apps/web/ @scriv
+
+# Documentación
+
+\*.md @scriv
+
+# Configuración del Proyecto
+
+pnpm-lock.yaml @scriv
+pnpm-workspace.yaml @scriv
+package.json @scriv
