@@ -254,27 +254,10 @@ pnpm prisma migrate dev
 PORT=3001
 ```
 
-## 📚 Recursos
-
-- [Documentación de Cambios](./CAMBIOS.md)
-- [Guía de Setup](./SETUP.md)
-- [Astro Docs](https://docs.astro.build)
-- [Prisma Docs](https://www.prisma.io/docs)
-- [Express Docs](https://expressjs.com)
-
-## 🎯 Próximas Mejoras
-
-- [ ] Dashboard de links creados
-- [ ] Autenticación de usuarios
-- [ ] QR codes para links
-- [ ] Estadísticas en tiempo real
-- [ ] Tema claro/oscuro toggle
-- [ ] Exportar links a JSON/CSV
-
 ## 📄 Licencia
 
 MIT - Siéntete libre de usar y modificar
 
 ---
 
-**¡Hecho con ❤️ por tu asistente de IA!**
+**¡Hecho con ❤️!**
