@@ -1,17 +1,27 @@
 ---
-
+import MainLayout from "../layouts/Layout.astro";
+import LinkForm from "../components/LinkForm.astro";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Bienvenidos a Linksy</h1>
-	</body>
-</html>
+<MainLayout>
+  <div class="space-y-8 w-full">
+    <!-- Header -->
+    <div class="space-y-3">
+      <h1 class="text-5xl font-bold text-white tracking-tight">
+        Linksy
+      </h1>
+      <p class="text-[#b0b0b0] text-lg">
+        Acorta tus enlaces con un alias personalizado
+      </p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-[#1a1a1a] border border-[#333333] rounded-xl p-8 shadow-xl backdrop-blur-sm">
+      <div class="space-y-1 mb-6">
+        <h2 class="text-xl font-semibold text-white">Crear un enlace corto</h2>
+        <p class="text-[#6b7280] text-sm">Rápido, simple y minimalista</p>
+      </div>
+      <LinkForm />
+    </div>
+
+</MainLayout>

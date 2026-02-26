@@ -1,0 +1,171 @@
+---
+// LinkForm component
+---
+
+<form id="linkForm" class="space-y-4 w-full">
+  <div>
+    <label for="url" class="block text-sm font-medium text-[#b0b0b0] mb-2">
+      URL Original
+    </label>
+    <input
+      id="url"
+      type="url"
+      placeholder="https://ejemplo.com"
+      class="w-full bg-[#1a1a1a] border border-[#333333] rounded-lg px-4 py-3 text-white placeholder-[#6b7280] outline-none focus:border-[#555555] focus:ring-1 focus:ring-[#444444] transition-all"
+      required
+    />
+    <span id="urlError" class="hidden text-red-500 text-sm mt-1 block"></span>
+  </div>
+
+  <div>
+    <label for="alias" class="block text-sm font-medium text-[#b0b0b0] mb-2">
+      Alias Personalizado
+    </label>
+    <input
+      id="alias"
+      type="text"
+      placeholder="mi-link-corto"
+      class="w-full bg-[#1a1a1a] border border-[#333333] rounded-lg px-4 py-3 text-white placeholder-[#6b7280] outline-none focus:border-[#555555] focus:ring-1 focus:ring-[#444444] transition-all"
+      required
+    />
+    <span id="aliasError" class="hidden text-red-500 text-sm mt-1 block"></span>
+  </div>
+
+  <button
+    type="submit"
+    class="w-full bg-white text-black py-3 rounded-lg font-medium hover:bg-[#f0f0f0] active:bg-[#e0e0e0] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+    id="submitBtn"
+  >
+    Crear Link
+  </button>
+</form>
+
+<div id="resultContainer" class="mt-6"></div>
+
+<script>
+  const form = document.getElementById('linkForm') as HTMLFormElement;
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+  const resultContainer = document.getElementById('resultContainer') as HTMLDivElement;
+  const urlInput = document.getElementById('url') as HTMLInputElement;
+  const aliasInput = document.getElementById('alias') as HTMLInputElement;
+  const urlError = document.getElementById('urlError') as HTMLElement;
+  const aliasError = document.getElementById('aliasError') as HTMLElement;
+
+  const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000';
+
+  // Limpiar errores cuando el usuario empieza a escribir
+  urlInput.addEventListener('input', () => {
+    urlError.classList.add('hidden');
+  });
+
+  aliasInput.addEventListener('input', () => {
+    aliasError.classList.add('hidden');
+  });
+
+  form.addEventListener('submit', async (e: SubmitEvent) => {
+    e.preventDefault();
+
+    const url = urlInput.value.trim();
+    const alias = aliasInput.value.trim();
+
+    // Limpiar errores previos
+    urlError.classList.add('hidden');
+    aliasError.classList.add('hidden');
+    resultContainer.innerHTML = '';
+
+    // Validación básica
+    if (!url) {
+      urlError.textContent = 'La URL es requerida';
+      urlError.classList.remove('hidden');
+      return;
+    }
+
+    if (!alias) {
+      aliasError.textContent = 'El alias es requerido';
+      aliasError.classList.remove('hidden');
+      return;
+    }
+
+    // Mostrar estado de carga
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creando...';
+
+    try {
+      const res = await fetch(`${API_URL}/api/links`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url, alias }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Éxito
+        resultContainer.innerHTML = `
+          <div class="bg-[#1a1a1a] border border-[#2a5a2a] rounded-lg p-4 space-y-3">
+            <p class="text-[#6b7280] text-sm">✓ Link creado exitosamente</p>
+            <div class="flex items-center gap-2">
+              <input 
+                type="text" 
+                value="${data.shortUrl}" 
+                readonly
+                class="flex-1 bg-[#0a0a0a] border border-[#333333] rounded px-3 py-2 text-white text-sm"
+              />
+              <button
+                onclick="navigator.clipboard.writeText('${data.shortUrl}'); this.textContent = '✓ Copiado'; setTimeout(() => this.textContent = 'Copiar', 2000)"
+                class="bg-[#333333] hover:bg-[#444444] text-white px-4 py-2 rounded text-sm transition-all"
+              >
+                Copiar
+              </button>
+            </div>
+            <a 
+              href="${data.shortUrl}" 
+              target="_blank"
+              class="text-white underline hover:text-[#b0b0b0] text-sm inline-block"
+            >
+              Abrir link →
+            </a>
+          </div>
+        `;
+
+        // Limpiar formulario
+        form.reset();
+      } else {
+        // Error desde la API
+        if (data.error) {
+          if (Array.isArray(data.error)) {
+            // Errores de validación Zod
+            data.error.forEach((err: any) => {
+              if (err.path[0] === 'url') {
+                urlError.textContent = err.message;
+                urlError.classList.remove('hidden');
+              } else if (err.path[0] === 'alias') {
+                aliasError.textContent = err.message;
+                aliasError.classList.remove('hidden');
+              }
+            });
+          } else {
+            // Error general
+            resultContainer.innerHTML = `
+              <div class="bg-[#1a1a1a] border border-[#5a2a2a] rounded-lg p-4">
+                <p class="text-red-500 text-sm">✕ ${data.error}</p>
+              </div>
+            `;
+          }
+        }
+      }
+    } catch (error) {
+      resultContainer.innerHTML = `
+        <div class="bg-[#1a1a1a] border border-[#5a2a2a] rounded-lg p-4">
+          <p class="text-red-500 text-sm">✕ Error de conexión. Verifica que la API esté disponible.</p>
+        </div>
+      `;
+      console.error('Error:', error);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Crear Link';
+    }
+  });
+</script>
