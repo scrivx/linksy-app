@@ -14,7 +14,7 @@ export const createShortLink = async (
   return repo.createLink(alias, url);
 };
 
-export const getLink = async (alias: string): Promise<Link | undefined> => {
+export const getLink = async (alias: string): Promise<Link | null> => {
   return repo.findByAlias(alias);
 };
 
