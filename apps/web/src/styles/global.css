@@ -373,7 +373,7 @@ html {
   gap: 12px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
-  color: #8a4a4a;
+  color: #c25252;
   letter-spacing: 0.04em;
   animation: fadeSlide 0.3s ease both;
 }
@@ -383,7 +383,7 @@ html {
 }
 
 .lf-error .lf-label-line {
-  background: #5a2a2a;
+  background: #863535;
   flex-shrink: 0;
 }
 
