@@ -2,6 +2,8 @@
 
 Una aplicación web minimalista y elegante para acortar enlaces con alias personalizados.
 
+![Preview de la app](apps/web/public/preview-app.webp)
+
 ## ✨ Características
 
 - **Diseño Minimalista Oscuro**: Tema elegante con tonos grises y blancos
