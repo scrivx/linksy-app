@@ -1,171 +1,210 @@
 ---
-// LinkForm component
+// LinkForm.astro
 ---
+<!-- Form -->
+    <form class="lf-form" id="linkForm" novalidate>
+      <!-- URL Field -->
+      <div class="lf-field-group">
+        <label class="lf-label" for="lf-url">
+          <span class="lf-label-line"></span>
+          url original
+        </label>
+        <div class="lf-input-wrapper" id="wrapper-url">
+          <span class="lf-prefix">https://</span>
+          <input
+            id="lf-url"
+            name="url"
+            type="text"
+            placeholder="enlace-a-patito.com/myducks.html"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
 
-<form id="linkForm" class="space-y-4 w-full">
-  <div>
-    <label for="url" class="block text-sm font-medium text-[#b0b0b0] mb-2">
-      URL Original
-    </label>
-    <input
-      id="url"
-      type="url"
-      placeholder="https://ejemplo.com"
-      class="w-full bg-[#1a1a1a] border border-[#333333] rounded-lg px-4 py-3 text-white placeholder-[#6b7280] outline-none focus:border-[#555555] focus:ring-1 focus:ring-[#444444] transition-all"
-      required
-    />
-    <span id="urlError" class="hidden text-red-500 text-sm mt-1 block"></span>
+      <!-- Alias Field -->
+      <div class="lf-field-group">
+        <label class="lf-label" for="lf-alias">
+          <span class="lf-label-line"></span>
+          Alias personalizado
+          <span class="lf-badge">required</span>
+        </label>
+        <div class="lf-input-wrapper" id="wrapper-alias">
+          <span class="lf-prefix">linksy.io/</span>
+          <input
+            id="lf-alias"
+            name="alias"
+            type="text"
+            placeholder="patito"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="lf-button" id="lf-submit" disabled>
+        <span class="lf-button-content" id="lf-btn-content">
+          <span class="lf-arrow">→</span>
+          crear link
+        </span>
+      </button>
+    </form>
+
+    <!-- Result block (hidden by default) -->
+    <div class="lf-result hidden" id="lf-result">
+      <div class="lf-result-row">
+        <span class="lf-result-label">
+          <span class="lf-label-line"></span>
+          link generado
+        </span>
+        <button class="lf-copy-btn" id="lf-copy-btn" title="Copiar enlace">
+          <span id="lf-copy-icon">⎘</span>
+        </button>
+      </div>
+      <a id="lf-result-url" href="#" target="_blank" rel="noopener noreferrer"></a>
+    </div>
+
+    <!-- Error block (hidden by default) -->
+    <div class="lf-error hidden" id="lf-error">
+      <span class="lf-label-line"></span>
+      <span id="lf-error-msg"></span>
+    </div>
+
+    <!-- Footer -->
+    <div class="lf-footer">
+      <span class="lf-footer-text">Realizado con cariño ❤️</span>
+      <div class="lf-footer-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
   </div>
-
-  <div>
-    <label for="alias" class="block text-sm font-medium text-[#b0b0b0] mb-2">
-      Alias Personalizado
-    </label>
-    <input
-      id="alias"
-      type="text"
-      placeholder="mi-link-corto"
-      class="w-full bg-[#1a1a1a] border border-[#333333] rounded-lg px-4 py-3 text-white placeholder-[#6b7280] outline-none focus:border-[#555555] focus:ring-1 focus:ring-[#444444] transition-all"
-      required
-    />
-    <span id="aliasError" class="hidden text-red-500 text-sm mt-1 block"></span>
-  </div>
-
-  <button
-    type="submit"
-    class="w-full bg-white text-black py-3 rounded-lg font-medium hover:bg-[#f0f0f0] active:bg-[#e0e0e0] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-    id="submitBtn"
-  >
-    Crear Link
-  </button>
-</form>
-
-<div id="resultContainer" class="mt-6"></div>
+</div>
 
 <script>
-  const form = document.getElementById('linkForm') as HTMLFormElement;
-  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
-  const resultContainer = document.getElementById('resultContainer') as HTMLDivElement;
-  const urlInput = document.getElementById('url') as HTMLInputElement;
-  const aliasInput = document.getElementById('alias') as HTMLInputElement;
-  const urlError = document.getElementById('urlError') as HTMLElement;
-  const aliasError = document.getElementById('aliasError') as HTMLElement;
+  import { createLink } from '../lib/api';
 
-  const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000';
+  const form       = document.getElementById("linkForm") as HTMLFormElement;
+  const urlInput   = document.getElementById("lf-url") as HTMLInputElement;
+  const aliasInput = document.getElementById("lf-alias") as HTMLInputElement;
+  const submitBtn  = document.getElementById("lf-submit") as HTMLButtonElement;
+  const btnContent = document.getElementById("lf-btn-content")!;
+  const resultBlock = document.getElementById("lf-result")!;
+  const resultUrl   = document.getElementById("lf-result-url") as HTMLAnchorElement;
+  const errorBlock  = document.getElementById("lf-error")!;
+  const errorMsg    = document.getElementById("lf-error-msg")!;
+  const copyBtn     = document.getElementById("lf-copy-btn")!;
+  const copyIcon    = document.getElementById("lf-copy-icon")!;
 
-  // Limpiar errores cuando el usuario empieza a escribir
-  urlInput.addEventListener('input', () => {
-    urlError.classList.add('hidden');
+  // ── Focus states ──
+  document.querySelectorAll<HTMLInputElement>(".lf-input-wrapper input").forEach((input) => {
+    const wrapper = input.closest(".lf-input-wrapper")!;
+    input.addEventListener("focus", () => wrapper.classList.add("focused"));
+    input.addEventListener("blur",  () => wrapper.classList.remove("focused"));
   });
 
-  aliasInput.addEventListener('input', () => {
-    aliasError.classList.add('hidden');
+  // ── Enable/disable button ──
+  urlInput.addEventListener("input", () => {
+    submitBtn.disabled = urlInput.value.trim() === "";
+    hideResult();
+    hideError();
   });
 
-  form.addEventListener('submit', async (e: SubmitEvent) => {
+  // ── State helpers ──
+  function setLoading() {
+    submitBtn.disabled = true;
+    submitBtn.classList.add("loading");
+    btnContent.innerHTML = `
+      <span class="lf-dot-1"></span>
+      <span class="lf-dot-2"></span>
+      <span class="lf-dot-3"></span>
+    `;
+  }
+
+  function setSuccess() {
+    submitBtn.classList.remove("loading");
+    submitBtn.classList.add("success");
+    btnContent.innerHTML = `<span>✓</span> ENLACE CREADO`;
+  }
+
+  function resetButton() {
+    submitBtn.classList.remove("loading", "success");
+    submitBtn.disabled = false;
+    btnContent.innerHTML = `<span class="lf-arrow">→</span> CREAR LINK`;
+  }
+
+  function showResult(url: string) {
+    resultUrl.href        = url;
+    resultUrl.textContent = url;
+    resultBlock.classList.remove("hidden");
+  }
+
+  function hideResult() {
+    resultBlock.classList.add("hidden");
+  }
+
+  function showError(message: string) {
+    errorMsg.textContent = message;
+    errorBlock.classList.remove("hidden");
+  }
+
+  function hideError() {
+    errorBlock.classList.add("hidden");
+  }
+
+  // ── Copy to clipboard ──
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(resultUrl.href);
+      copyIcon.textContent = "✓";
+      copyBtn.classList.add("copied");
+      setTimeout(() => {
+        copyIcon.textContent = "⎘";
+        copyBtn.classList.remove("copied");
+      }, 2000);
+    } catch {
+      // Fallback for older browsers
+      const tmp = document.createElement("input");
+      tmp.value = resultUrl.href;
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand("copy");
+      document.body.removeChild(tmp);
+    }
+  });
+
+  // ── Submit ──
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const url = urlInput.value.trim();
+    const url   = urlInput.value.trim();
     const alias = aliasInput.value.trim();
 
-    // Limpiar errores previos
-    urlError.classList.add('hidden');
-    aliasError.classList.add('hidden');
-    resultContainer.innerHTML = '';
+    if (!url) return;
 
-    // Validación básica
-    if (!url) {
-      urlError.textContent = 'La URL es requerida';
-      urlError.classList.remove('hidden');
+    hideResult();
+    hideError();
+    setLoading();
+
+    const result = await createLink(url, alias);
+
+    if ("error" in result) {
+      const errorText = Array.isArray(result.error)
+        ? result.error.map((e) => e.message).join(" · ")
+        : result.error;
+
+      resetButton();
+      showError(errorText);
       return;
     }
 
-    if (!alias) {
-      aliasError.textContent = 'El alias es requerido';
-      aliasError.classList.remove('hidden');
-      return;
-    }
-
-    // Mostrar estado de carga
+    // Success
+    setSuccess();
+    showResult(result.shortUrl);
+    form.reset();
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Creando...';
 
-    try {
-      const res = await fetch(`${API_URL}/api/links`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url, alias }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        // Éxito
-        resultContainer.innerHTML = `
-          <div class="bg-[#1a1a1a] border border-[#2a5a2a] rounded-lg p-4 space-y-3">
-            <p class="text-[#6b7280] text-sm">✓ Link creado exitosamente</p>
-            <div class="flex items-center gap-2">
-              <input 
-                type="text" 
-                value="${data.shortUrl}" 
-                readonly
-                class="flex-1 bg-[#0a0a0a] border border-[#333333] rounded px-3 py-2 text-white text-sm"
-              />
-              <button
-                onclick="navigator.clipboard.writeText('${data.shortUrl}'); this.textContent = '✓ Copiado'; setTimeout(() => this.textContent = 'Copiar', 2000)"
-                class="bg-[#333333] hover:bg-[#444444] text-white px-4 py-2 rounded text-sm transition-all"
-              >
-                Copiar
-              </button>
-            </div>
-            <a 
-              href="${data.shortUrl}" 
-              target="_blank"
-              class="text-white underline hover:text-[#b0b0b0] text-sm inline-block"
-            >
-              Abrir link →
-            </a>
-          </div>
-        `;
-
-        // Limpiar formulario
-        form.reset();
-      } else {
-        // Error desde la API
-        if (data.error) {
-          if (Array.isArray(data.error)) {
-            // Errores de validación Zod
-            data.error.forEach((err: any) => {
-              if (err.path[0] === 'url') {
-                urlError.textContent = err.message;
-                urlError.classList.remove('hidden');
-              } else if (err.path[0] === 'alias') {
-                aliasError.textContent = err.message;
-                aliasError.classList.remove('hidden');
-              }
-            });
-          } else {
-            // Error general
-            resultContainer.innerHTML = `
-              <div class="bg-[#1a1a1a] border border-[#5a2a2a] rounded-lg p-4">
-                <p class="text-red-500 text-sm">✕ ${data.error}</p>
-              </div>
-            `;
-          }
-        }
-      }
-    } catch (error) {
-      resultContainer.innerHTML = `
-        <div class="bg-[#1a1a1a] border border-[#5a2a2a] rounded-lg p-4">
-          <p class="text-red-500 text-sm">✕ Error de conexión. Verifica que la API esté disponible.</p>
-        </div>
-      `;
-      console.error('Error:', error);
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Crear Link';
-    }
+    setTimeout(resetButton, 3000);
   });
 </script>
+

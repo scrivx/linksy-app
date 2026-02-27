@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 
@@ -10,7 +10,11 @@ export default defineConfig({
   },
   env: {
     schema: {
-      PUBLIC_API_URL: import.meta.env.PUBLIC_API_URL || 'http://localhost:3000',
+      PUBLIC_API_URL: envField.string({
+        context: 'client',
+        access: 'public',
+        default: 'http://localhost:3000',
+      }),
     }
   }
 });

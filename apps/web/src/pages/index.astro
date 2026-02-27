@@ -4,24 +4,13 @@ import LinkForm from "../components/LinkForm.astro";
 ---
 
 <MainLayout>
-  <div class="space-y-8 w-full">
-    <!-- Header -->
-    <div class="space-y-3">
-      <h1 class="text-5xl font-bold text-white tracking-tight">
-        Linksy
-      </h1>
-      <p class="text-[#b0b0b0] text-lg">
-        Acorta tus enlaces con un alias personalizado
-      </p>
+  <div class="lf-header">
+    <div class="lf-accent-bar"></div>
+    <div>
+      <p class="lf-eyebrow">// Linksy</p>
+      <h2 class="lf-title">Nuevo Link</h2>
     </div>
-
-    <!-- Form Card -->
-    <div class="bg-[#1a1a1a] border border-[#333333] rounded-xl p-8 shadow-xl backdrop-blur-sm">
-      <div class="space-y-1 mb-6">
-        <h2 class="text-xl font-semibold text-white">Crear un enlace corto</h2>
-        <p class="text-[#6b7280] text-sm">Rápido, simple y minimalista</p>
-      </div>
-      <LinkForm />
-    </div>
-
+    <div class="lf-status-dot"></div>
+  </div>
+  <LinkForm />
 </MainLayout>
