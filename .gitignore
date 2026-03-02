@@ -5,6 +5,11 @@ node_modules
 
 # environment files
 .env
+.env.local
+.env.production
+
+# Vercel
+.vercel
 
 # pnpm
 .pnpm-store
