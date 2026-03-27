@@ -13,3 +13,9 @@ node_modules
 
 # pnpm
 .pnpm-store
+
+# Astro
+.astro
+
+/.agent
+/.agents

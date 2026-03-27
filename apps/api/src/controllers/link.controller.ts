@@ -44,6 +44,9 @@ export const redirect = async (
     }
 
     await service.registerClick(alias);
+    
+    // Cache the redirect for 1 minute to improve performance while balancing analytics accuracy
+    res.setHeader('Cache-Control', 'public, max-age=60');
     res.redirect(link.original_url);
   } catch (error: any) {
     res.status(500).json({ error: 'Internal server error' });
