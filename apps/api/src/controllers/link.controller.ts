@@ -18,9 +18,11 @@ export const createLink = async (
     const { url, alias } = createLinkSchema.parse(req.body);
 
     const link = await service.createShortLink(alias, url);
+    const baseUrl =
+      process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
 
     res.json({
-      shortUrl: `${process.env.BASE_URL}/${alias}`,
+      shortUrl: `${baseUrl}/${alias}`,
       data: link,
     });
   } catch (error: any) {
@@ -44,7 +46,7 @@ export const redirect = async (
     }
 
     await service.registerClick(alias);
-    
+
     // Cache the redirect for 1 minute to improve performance while balancing analytics accuracy
     res.setHeader('Cache-Control', 'public, max-age=60');
     res.redirect(link.original_url);
