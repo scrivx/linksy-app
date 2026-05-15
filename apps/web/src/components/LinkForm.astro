@@ -1,118 +1,123 @@
 ---
-// LinkForm.astro
+// LinkForm.astro — main link creation form
 ---
-<!-- Form -->
-    <form class="lf-form" id="linkForm" novalidate>
-      <!-- URL Field -->
-      <div class="lf-field-group">
-        <label class="lf-label" for="lf-url">
-          <span class="lf-label-line"></span>
-          url original
-        </label>
-        <div class="lf-input-wrapper" id="wrapper-url">
-          <span class="lf-prefix">https://</span>
-          <input
-            id="lf-url"
-            name="url"
-            type="text"
-            placeholder="enlace-a-patito.com/myducks.html"
-            autocomplete="off"
-            spellcheck="false"
-          />
-        </div>
-      </div>
 
-      <!-- Alias Field -->
-      <div class="lf-field-group">
-        <label class="lf-label" for="lf-alias">
-          <span class="lf-label-line"></span>
-          Alias personalizado
-          <span class="lf-badge">required</span>
-        </label>
-        <div class="lf-input-wrapper" id="wrapper-alias">
-          <span class="lf-prefix">linksy.io/</span>
-          <input
-            id="lf-alias"
-            name="alias"
-            type="text"
-            placeholder="patito"
-            autocomplete="off"
-            spellcheck="false"
-          />
-        </div>
-      </div>
-
-      <!-- Submit -->
-      <button type="submit" class="lf-button" id="lf-submit" disabled>
-        <span class="lf-button-content" id="lf-btn-content">
-          <span class="lf-arrow">→</span>
-          crear link
-        </span>
-      </button>
-    </form>
-
-    <!-- Result block (hidden by default) -->
-    <div class="lf-result hidden" id="lf-result">
-      <div class="lf-result-row">
-        <span class="lf-result-label">
-          <span class="lf-label-line"></span>
-          link generado
-        </span>
-        <button class="lf-copy-btn" id="lf-copy-btn" title="Copiar enlace">
-          <span id="lf-copy-icon">⎘</span>
-        </button>
-      </div>
-      <a id="lf-result-url" href="#" target="_blank" rel="noopener noreferrer"></a>
-    </div>
-
-    <!-- Error block (hidden by default) -->
-    <div class="lf-error hidden" id="lf-error">
+<form class="lf-form" id="linkForm" novalidate>
+  <div class="lf-field-group">
+    <label class="lf-label" for="lf-url">
       <span class="lf-label-line"></span>
-      <span id="lf-error-msg"></span>
+      url original
+    </label>
+    <div class="lf-input-wrapper" id="wrapper-url">
+      <span class="lf-prefix">https://</span>
+      <input
+        id="lf-url"
+        name="url"
+        type="url"
+        inputmode="url"
+        placeholder="ejemplo.com/ruta"
+        autocomplete="off"
+        spellcheck="false"
+        aria-describedby="lf-error-msg"
+      />
     </div>
+  </div>
 
-    <!-- Footer -->
-    <div class="lf-footer">
-      <span class="lf-footer-text">Realizado con cariño ❤️</span>
-      <div class="lf-footer-dots" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
+  <div class="lf-field-group">
+    <label class="lf-label" for="lf-alias">
+      <span class="lf-label-line"></span>
+      alias personalizado
+      <span class="lf-badge">required</span>
+    </label>
+    <div class="lf-input-wrapper" id="wrapper-alias">
+      <span class="lf-prefix">linksy.io/</span>
+      <input
+        id="lf-alias"
+        name="alias"
+        type="text"
+        placeholder="mi-link"
+        autocomplete="off"
+        spellcheck="false"
+        maxlength="64"
+      />
+      <span class="lf-counter" id="lf-alias-counter" aria-hidden="true">0/64</span>
     </div>
+  </div>
+
+  <button type="submit" class="lf-button" id="lf-submit" disabled aria-busy="false">
+    <span class="lf-button-content" id="lf-btn-content">
+      <span class="lf-arrow">→</span>
+      crear link
+    </span>
+  </button>
+</form>
+
+<div class="lf-result hidden" id="lf-result" role="status" aria-live="polite">
+  <div class="lf-result-row">
+    <span class="lf-result-label">
+      <span class="lf-label-line"></span>
+      link generado
+    </span>
+    <button class="lf-copy-btn" id="lf-copy-btn" title="Copiar enlace" aria-label="Copiar enlace al portapapeles">
+      <span id="lf-copy-icon" aria-hidden="true">⎘</span>
+    </button>
+  </div>
+  <a id="lf-result-url" class="lf-result-url" href="#" target="_blank" rel="noopener noreferrer"></a>
+  <a id="lf-stats-link" class="lf-stats-anchor" href="#">
+    ver estadísticas
+    <span aria-hidden="true">→</span>
+  </a>
+</div>
+
+<div class="lf-error hidden" id="lf-error" role="alert" aria-live="assertive">
+  <span class="lf-label-line"></span>
+  <span id="lf-error-msg"></span>
+</div>
+
+<div class="lf-footer">
+  <span class="lf-footer-text">v1.0 · estable</span>
+  <div class="lf-footer-dots" aria-hidden="true">
+    <span></span><span></span><span></span>
   </div>
 </div>
 
 <script>
   import { createLink } from '../lib/api';
 
-  const form       = document.getElementById("linkForm") as HTMLFormElement;
-  const urlInput   = document.getElementById("lf-url") as HTMLInputElement;
-  const aliasInput = document.getElementById("lf-alias") as HTMLInputElement;
-  const submitBtn  = document.getElementById("lf-submit") as HTMLButtonElement;
-  const btnContent = document.getElementById("lf-btn-content")!;
-  const resultBlock = document.getElementById("lf-result")!;
-  const resultUrl   = document.getElementById("lf-result-url") as HTMLAnchorElement;
-  const errorBlock  = document.getElementById("lf-error")!;
-  const errorMsg    = document.getElementById("lf-error-msg")!;
-  const copyBtn     = document.getElementById("lf-copy-btn")!;
-  const copyIcon    = document.getElementById("lf-copy-icon")!;
+  const form         = document.getElementById("linkForm") as HTMLFormElement;
+  const urlInput     = document.getElementById("lf-url") as HTMLInputElement;
+  const aliasInput   = document.getElementById("lf-alias") as HTMLInputElement;
+  const aliasCounter = document.getElementById("lf-alias-counter")!;
+  const submitBtn    = document.getElementById("lf-submit") as HTMLButtonElement;
+  const btnContent   = document.getElementById("lf-btn-content")!;
+  const resultBlock  = document.getElementById("lf-result")!;
+  const resultUrl    = document.getElementById("lf-result-url") as HTMLAnchorElement;
+  const errorBlock   = document.getElementById("lf-error")!;
+  const errorMsg     = document.getElementById("lf-error-msg")!;
+  const copyBtn      = document.getElementById("lf-copy-btn")!;
+  const copyIcon     = document.getElementById("lf-copy-icon")!;
+  const statsLink    = document.getElementById("lf-stats-link") as HTMLAnchorElement;
 
-  // ── Focus states ──
   document.querySelectorAll<HTMLInputElement>(".lf-input-wrapper input").forEach((input) => {
     const wrapper = input.closest(".lf-input-wrapper")!;
     input.addEventListener("focus", () => wrapper.classList.add("focused"));
     input.addEventListener("blur",  () => wrapper.classList.remove("focused"));
   });
 
-  // ── Enable/disable button ──
+  const updateAliasCounter = () => {
+    aliasCounter.textContent = `${aliasInput.value.length}/64`;
+  };
+  aliasInput.addEventListener("input", updateAliasCounter);
+
   urlInput.addEventListener("input", () => {
     submitBtn.disabled = urlInput.value.trim() === "";
     hideResult();
     hideError();
   });
 
-  // ── State helpers ──
   function setLoading() {
     submitBtn.disabled = true;
+    submitBtn.setAttribute("aria-busy", "true");
     submitBtn.classList.add("loading");
     btnContent.innerHTML = `
       <span class="lf-dot-1"></span>
@@ -123,19 +128,22 @@
 
   function setSuccess() {
     submitBtn.classList.remove("loading");
+    submitBtn.setAttribute("aria-busy", "false");
     submitBtn.classList.add("success");
-    btnContent.innerHTML = `<span>✓</span> ENLACE CREADO`;
+    btnContent.innerHTML = `<span aria-hidden="true">✓</span> enlace creado`;
   }
 
   function resetButton() {
     submitBtn.classList.remove("loading", "success");
-    submitBtn.disabled = false;
-    btnContent.innerHTML = `<span class="lf-arrow">→</span> CREAR LINK`;
+    submitBtn.setAttribute("aria-busy", "false");
+    submitBtn.disabled = urlInput.value.trim() === "";
+    btnContent.innerHTML = `<span class="lf-arrow">→</span> crear link`;
   }
 
-  function showResult(url: string) {
+  function showResult(url: string, alias: string) {
     resultUrl.href        = url;
     resultUrl.textContent = url;
+    statsLink.href        = `/stats?alias=${encodeURIComponent(alias)}`;
     resultBlock.classList.remove("hidden");
   }
 
@@ -152,7 +160,6 @@
     errorBlock.classList.add("hidden");
   }
 
-  // ── Copy to clipboard ──
   copyBtn.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(resultUrl.href);
@@ -163,7 +170,6 @@
         copyBtn.classList.remove("copied");
       }, 2000);
     } catch {
-      // Fallback for older browsers
       const tmp = document.createElement("input");
       tmp.value = resultUrl.href;
       document.body.appendChild(tmp);
@@ -173,13 +179,11 @@
     }
   });
 
-  // ── Submit ──
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const url   = urlInput.value.trim();
     const alias = aliasInput.value.trim();
-
     if (!url) return;
 
     hideResult();
@@ -198,13 +202,12 @@
       return;
     }
 
-    // Success
     setSuccess();
-    showResult(result.shortUrl);
+    showResult(result.shortUrl, result.data.alias);
     form.reset();
+    updateAliasCounter();
     submitBtn.disabled = true;
 
     setTimeout(resetButton, 3000);
   });
 </script>
-

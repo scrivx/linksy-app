@@ -1,18 +1,20 @@
-import { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
+import type { CreateLinkInput } from '@linksy/shared';
 import * as service from '../services/link.service.js';
+import { HttpError } from '../utils/errors.js';
 
-// request schema
 const createLinkSchema = z.object({
   url: z.string().url(),
-  alias: z.string().min(1),
-});
+  alias: z.string().min(1).max(64),
+}) satisfies z.ZodType<CreateLinkInput>;
 
 type CreateLinkBody = z.infer<typeof createLinkSchema>;
 
 export const createLink = async (
   req: Request<{}, {}, CreateLinkBody>,
   res: Response,
+  next: NextFunction,
 ) => {
   try {
     const { url, alias } = createLinkSchema.parse(req.body);
@@ -25,39 +27,35 @@ export const createLink = async (
       shortUrl: `${baseUrl}/${alias}`,
       data: link,
     });
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.issues });
-    }
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
 export const redirect = async (
   req: Request<{ alias: string }>,
   res: Response,
+  next: NextFunction,
 ) => {
   try {
     const { alias } = req.params;
-    const link = await service.getLink(alias);
-
-    if (!link) {
-      return res.status(404).send('Link not found');
-    }
-
-    await service.registerClick(alias);
+    const link = await service.redirectAndCount(alias);
 
     // Cache the redirect for 1 minute to improve performance while balancing analytics accuracy
     res.setHeader('Cache-Control', 'public, max-age=60');
     res.redirect(link.original_url);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) {
+      return res.status(404).send('Link not found');
+    }
+    next(error);
   }
 };
 
 export const getLinkDetails = async (
   req: Request<{ alias: string }>,
   res: Response,
+  next: NextFunction,
 ) => {
   try {
     const { alias } = req.params;
@@ -68,24 +66,21 @@ export const getLinkDetails = async (
     }
 
     res.json(link);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (error) {
+    next(error);
   }
 };
 
 export const getStats = async (
   req: Request<{ alias: string }>,
   res: Response,
+  next: NextFunction,
 ) => {
   try {
     const { alias } = req.params;
     const stats = await service.getLinkStats(alias);
-
     res.json(stats);
-  } catch (error: any) {
-    if (error.message === 'Link not found') {
-      return res.status(404).json({ error: error.message });
-    }
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (error) {
+    next(error);
   }
 };

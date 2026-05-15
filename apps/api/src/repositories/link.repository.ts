@@ -15,7 +15,7 @@ export const findByAlias = async (alias: string) => {
   });
 };
 
-export const incrementClicks = async (alias: string) => {
+export const incrementAndFetch = async (alias: string) => {
   return prisma.link.update({
     where: { alias },
     data: {

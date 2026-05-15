@@ -1,36 +1,41 @@
 import * as repo from '../repositories/link.repository.js';
-import { Link } from '../models/link.model.js';
 import { isReserved } from '../utils/reserved-words.js';
+import { HttpError, isPrismaErrorWithCode } from '../utils/errors.js';
 
-export const createShortLink = async (
-  alias: string,
-  url: string,
-): Promise<Link> => {
+export const createShortLink = async (alias: string, url: string) => {
   if (isReserved(alias)) {
-    throw new Error('This alias is reserved and cannot be used');
+    throw new HttpError(400, 'This alias is reserved and cannot be used');
   }
 
-  const existing = await repo.findByAlias(alias);
-
-  if (existing) {
-    throw new Error('Alias already exists');
+  try {
+    return await repo.createLink(alias, url);
+  } catch (error: unknown) {
+    if (isPrismaErrorWithCode(error, 'P2002')) {
+      throw new HttpError(409, 'Alias already exists');
+    }
+    throw error;
   }
-
-  return repo.createLink(alias, url);
 };
 
-export const getLink = async (alias: string): Promise<Link | null> => {
+export const getLink = async (alias: string) => {
   return repo.findByAlias(alias);
 };
 
-export const registerClick = async (alias: string): Promise<void> => {
-  await repo.incrementClicks(alias);
+export const redirectAndCount = async (alias: string) => {
+  try {
+    return await repo.incrementAndFetch(alias);
+  } catch (error: unknown) {
+    if (isPrismaErrorWithCode(error, 'P2025')) {
+      throw new HttpError(404, 'Link not found');
+    }
+    throw error;
+  }
 };
 
 export const getLinkStats = async (alias: string) => {
   const link = await repo.findByAlias(alias);
   if (!link) {
-    throw new Error('Link not found');
+    throw new HttpError(404, 'Link not found');
   }
 
   return {

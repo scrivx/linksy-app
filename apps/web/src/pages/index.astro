@@ -1,16 +1,16 @@
 ---
-import MainLayout from "../layouts/Layout.astro";
+import Layout from "../layouts/Layout.astro";
 import LinkForm from "../components/LinkForm.astro";
 ---
 
-<MainLayout>
-  <div class="lf-header">
-    <div class="lf-accent-bar"></div>
+<Layout>
+  <header class="lf-header">
+    <div class="lf-accent-bar" aria-hidden="true"></div>
     <div>
-      <p class="lf-eyebrow">// Linksy</p>
-      <h2 class="lf-title uppercase">Crear Nuevo Link</h2>
+      <p class="lf-eyebrow">// linksy</p>
+      <h1 class="lf-title">Crear nuevo link</h1>
     </div>
-    <div class="lf-status-dot"></div>
-  </div>
+    <div class="lf-status-dot" aria-label="API conectada" role="status"></div>
+  </header>
   <LinkForm />
-</MainLayout>
+</Layout>

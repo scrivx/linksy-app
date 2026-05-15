@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "pnpm -r dev",
     "build": "pnpm -r build",
-    "test": "pnpm --filter api test"
+    "test": "pnpm --filter api test",
+    "type-check": "pnpm -r --parallel type-check"
   },
   "keywords": [],
   "author": "Scrivx",

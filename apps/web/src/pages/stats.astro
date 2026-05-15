@@ -1,0 +1,102 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Linksy — Estadísticas">
+  <section class="lf-stats" id="stats-root">
+    <header class="lf-stats-header">
+      <a href="/" class="lf-stats-back" aria-label="Volver al inicio">
+        <span class="lf-arrow" aria-hidden="true">←</span>
+        volver
+      </a>
+      <span class="lf-label">
+        <span class="lf-label-line"></span>
+        estadísticas
+      </span>
+    </header>
+
+    <div class="lf-stats-empty hidden" id="stats-empty">
+      <p>Falta el parámetro <code>?alias=tu-alias</code> en la URL.</p>
+    </div>
+
+    <div class="lf-stats-loading" id="stats-loading">
+      <span class="lf-dot-1"></span>
+      <span class="lf-dot-2"></span>
+      <span class="lf-dot-3"></span>
+    </div>
+
+    <div class="lf-error hidden" id="stats-error" role="alert" aria-live="assertive">
+      <span class="lf-label-line"></span>
+      <span id="stats-error-msg"></span>
+    </div>
+
+    <dl class="lf-stats-grid hidden" id="stats-grid" aria-live="polite">
+      <div class="lf-stat">
+        <dt>alias</dt>
+        <dd id="stat-alias">—</dd>
+      </div>
+      <div class="lf-stat">
+        <dt>clicks</dt>
+        <dd id="stat-clicks">—</dd>
+      </div>
+      <div class="lf-stat">
+        <dt>creado</dt>
+        <dd id="stat-created">—</dd>
+      </div>
+      <div class="lf-stat">
+        <dt>último acceso</dt>
+        <dd id="stat-last">—</dd>
+      </div>
+    </dl>
+  </section>
+</Layout>
+
+<script>
+  import { getStats } from "../lib/api";
+
+  const params = new URLSearchParams(window.location.search);
+  const alias = params.get("alias")?.trim();
+
+  const loading    = document.getElementById("stats-loading")!;
+  const grid       = document.getElementById("stats-grid")!;
+  const empty      = document.getElementById("stats-empty")!;
+  const errorBlock = document.getElementById("stats-error")!;
+  const errorMsg   = document.getElementById("stats-error-msg")!;
+
+  const hide = (el: HTMLElement) => el.classList.add("hidden");
+  const show = (el: HTMLElement) => el.classList.remove("hidden");
+
+  const formatDate = (iso: string | null | undefined): string => {
+    if (!iso) return "nunca";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleString("es-ES", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  };
+
+  if (!alias) {
+    hide(loading);
+    show(empty);
+  } else {
+    getStats(alias).then((result) => {
+      hide(loading);
+
+      if ("error" in result) {
+        const msg = Array.isArray(result.error)
+          ? result.error.map((e) => e.message).join(" · ")
+          : result.error;
+        errorMsg.textContent = msg;
+        show(errorBlock);
+        return;
+      }
+
+      (document.getElementById("stat-alias")!).textContent = result.alias;
+      (document.getElementById("stat-clicks")!).textContent = String(result.clicks);
+      (document.getElementById("stat-created")!).textContent = formatDate(result.created_at);
+      (document.getElementById("stat-last")!).textContent = formatDate(result.last_accessed_at);
+      show(grid);
+    });
+  }
+</script>
