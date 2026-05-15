@@ -1,26 +1,58 @@
 ---
 import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Linksy — Acortador de enlaces",
+  description = "Acorta tus enlaces con alias personalizados, simple y rápido.",
+} = Astro.props;
+
+const siteUrl = "https://linksy.app";
 ---
 
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Linksy - Acorta tus enlaces con alias personalizados"
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#050505" />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23050505'/%3E%3Ctext x='32' y='44' font-family='Inter,sans-serif' font-size='38' font-weight='600' text-anchor='middle' fill='%23ededed'%3EL%3C/text%3E%3C/svg%3E"
     />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:site_name" content="Linksy" />
+    <meta property="og:locale" content="es_ES" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <title>Linksy - Acortador de Enlaces</title>
+    <title>{title}</title>
   </head>
   <body class="lf-page">
     <div class="lf-grid" aria-hidden="true"></div>
     <main class="lf-card">
+      <div class="lf-corner lf-corner-tl" aria-hidden="true"></div>
+      <div class="lf-corner lf-corner-tr" aria-hidden="true"></div>
+      <div class="lf-corner lf-corner-bl" aria-hidden="true"></div>
+      <div class="lf-corner lf-corner-br" aria-hidden="true"></div>
       <slot />
     </main>
   </body>
