@@ -19,3 +19,7 @@ node_modules
 
 /.agent
 /.agents
+/.claude
+/.opencode
+skills-lock.json
+*.md

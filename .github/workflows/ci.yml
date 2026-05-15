@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: type-check · test · build
+    runs-on: ubuntu-latest
+
+    env:
+      # Required by Astro's envField validation. Dummy value is fine for build-time check.
+      PUBLIC_API_URL: https://api.example.com
+      # Required by apps/api/src/config/prisma.ts on module import. Not used in CI (no runtime).
+      DATABASE_URL: postgresql://user:pass@localhost:5432/linksy?schema=public
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm -r --parallel type-check
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm -r build
